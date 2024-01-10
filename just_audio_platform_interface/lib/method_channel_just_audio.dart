@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
 import 'just_audio_platform_interface.dart';
+
 
 /// An implementation of [JustAudioPlatform] that uses method channels.
 class MethodChannelJustAudio extends JustAudioPlatform {
@@ -47,11 +49,28 @@ class MethodChannelAudioPlayer extends AudioPlayerPlatform {
           .map((map) => PlaybackEventMessage.fromMap(map));
 
   @override
+  Stream<VisualizerWaveformCaptureMessage> get visualizerWaveformStream =>
+      EventChannel('com.ryanheise.just_audio.waveform_events.$id')
+          .receiveBroadcastStream()
+          .cast<Map<dynamic, dynamic>>()
+          .map((event) => VisualizerWaveformCaptureMessage(
+          samplingRate: event['samplingRate'] as int,
+          data: event['data'] as Uint8List));
+
+  @override
+  Stream<VisualizerFftCaptureMessage> get visualizerFftStream =>
+      EventChannel('com.ryanheise.just_audio.fft_events.$id')
+          .receiveBroadcastStream()
+          .cast<Map<dynamic, dynamic>>()
+          .map((event) => VisualizerFftCaptureMessage(
+          samplingRate: event['samplingRate'] as int,
+          data: event['data'] as Uint8List));
+
   Stream<PlayerDataMessage> get playerDataMessageStream =>
       EventChannel('com.ryanheise.just_audio.data.$id')
           .receiveBroadcastStream()
           .map((dynamic map) =>
-              PlayerDataMessage.fromMap(map as Map<dynamic, dynamic>));
+          PlayerDataMessage.fromMap(map as Map<dynamic, dynamic>));
 
   @override
   Future<LoadResponse> load(LoadRequest request) async {
@@ -121,8 +140,8 @@ class MethodChannelAudioPlayer extends AudioPlayerPlatform {
 
   @override
   Future<SetAutomaticallyWaitsToMinimizeStallingResponse>
-      setAutomaticallyWaitsToMinimizeStalling(
-          SetAutomaticallyWaitsToMinimizeStallingRequest request) async {
+  setAutomaticallyWaitsToMinimizeStalling(
+      SetAutomaticallyWaitsToMinimizeStallingRequest request) async {
     return SetAutomaticallyWaitsToMinimizeStallingResponse.fromMap(
         (await _channel.invokeMethod<Map<dynamic, dynamic>>(
             'setAutomaticallyWaitsToMinimizeStalling', request.toMap()))!);
@@ -130,9 +149,9 @@ class MethodChannelAudioPlayer extends AudioPlayerPlatform {
 
   @override
   Future<SetCanUseNetworkResourcesForLiveStreamingWhilePausedResponse>
-      setCanUseNetworkResourcesForLiveStreamingWhilePaused(
-          SetCanUseNetworkResourcesForLiveStreamingWhilePausedRequest
-              request) async {
+  setCanUseNetworkResourcesForLiveStreamingWhilePaused(
+      SetCanUseNetworkResourcesForLiveStreamingWhilePausedRequest
+      request) async {
     return SetCanUseNetworkResourcesForLiveStreamingWhilePausedResponse.fromMap(
         (await _channel.invokeMethod<Map<dynamic, dynamic>>(
             'setCanUseNetworkResourcesForLiveStreamingWhilePaused',
@@ -200,6 +219,21 @@ class MethodChannelAudioPlayer extends AudioPlayerPlatform {
   }
 
   @override
+  Future<StartVisualizerResponse> startVisualizer(
+      StartVisualizerRequest request) async {
+    return StartVisualizerResponse.fromMap(
+        (await _channel.invokeMethod<Map<dynamic, dynamic>>(
+            'startVisualizer', request.toMap()))!);
+  }
+
+  @override
+  Future<StopVisualizerResponse> stopVisualizer(
+      StopVisualizerRequest request) async {
+    return StopVisualizerResponse.fromMap(
+        (await _channel.invokeMethod('stopVisualizer', request.toMap()))!);
+  }
+
+  @override
   Future<AudioEffectSetEnabledResponse> audioEffectSetEnabled(
       AudioEffectSetEnabledRequest request) async {
     return AudioEffectSetEnabledResponse.fromMap(
@@ -209,8 +243,8 @@ class MethodChannelAudioPlayer extends AudioPlayerPlatform {
 
   @override
   Future<AndroidLoudnessEnhancerSetTargetGainResponse>
-      androidLoudnessEnhancerSetTargetGain(
-          AndroidLoudnessEnhancerSetTargetGainRequest request) async {
+  androidLoudnessEnhancerSetTargetGain(
+      AndroidLoudnessEnhancerSetTargetGainRequest request) async {
     return AndroidLoudnessEnhancerSetTargetGainResponse.fromMap(
         (await _channel.invokeMethod<Map<dynamic, dynamic>>(
             'androidLoudnessEnhancerSetTargetGain', request.toMap()))!);

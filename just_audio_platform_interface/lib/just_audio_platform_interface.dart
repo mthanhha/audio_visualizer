@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
@@ -76,6 +77,17 @@ abstract class AudioPlayerPlatform {
   Stream<PlayerDataMessage> get playerDataMessageStream =>
       const Stream<PlayerDataMessage>.empty();
 
+  /// A stream of visualizer waveform data.
+  Stream<VisualizerWaveformCaptureMessage> get visualizerWaveformStream {
+    throw UnimplementedError(
+        'visualizerWaveformStream has not been implemented.');
+  }
+
+  /// A stream of visualizer fft data.
+  Stream<VisualizerFftCaptureMessage> get visualizerFftStream {
+    throw UnimplementedError('visualizerFftStream has not been implemented.');
+  }
+
   /// Loads an audio source.
   Future<LoadResponse> load(LoadRequest request) {
     throw UnimplementedError("load() has not been implemented.");
@@ -130,8 +142,8 @@ abstract class AudioPlayerPlatform {
   /// On iOS and macOS, sets the automaticallyWaitsToMinimizeStalling option,
   /// and does nothing on other platforms.
   Future<SetAutomaticallyWaitsToMinimizeStallingResponse>
-      setAutomaticallyWaitsToMinimizeStalling(
-          SetAutomaticallyWaitsToMinimizeStallingRequest request) {
+  setAutomaticallyWaitsToMinimizeStalling(
+      SetAutomaticallyWaitsToMinimizeStallingRequest request) {
     throw UnimplementedError(
         "setAutomaticallyWaitsToMinimizeStalling() has not been implemented.");
   }
@@ -140,8 +152,8 @@ abstract class AudioPlayerPlatform {
   /// canUseNetworkResourcesForLiveStreamingWhilePaused option, and does nothing
   /// on other platforms.
   Future<SetCanUseNetworkResourcesForLiveStreamingWhilePausedResponse>
-      setCanUseNetworkResourcesForLiveStreamingWhilePaused(
-          SetCanUseNetworkResourcesForLiveStreamingWhilePausedRequest request) {
+  setCanUseNetworkResourcesForLiveStreamingWhilePaused(
+      SetCanUseNetworkResourcesForLiveStreamingWhilePausedRequest request) {
     throw UnimplementedError(
         "setCanUseNetworkResourcesForLiveStreamingWhilePaused() has not been implemented.");
   }
@@ -202,6 +214,17 @@ abstract class AudioPlayerPlatform {
     throw UnimplementedError("concatenatingMove() has not been implemented.");
   }
 
+  /// Starts the visualizer.
+  Future<StartVisualizerResponse> startVisualizer(
+      StartVisualizerRequest request) {
+    throw UnimplementedError("startVisualizer() has not been implemented.");
+  }
+
+  /// Stops the visualizer.
+  Future<StopVisualizerResponse> stopVisualizer(StopVisualizerRequest request) {
+    throw UnimplementedError("stopVisualizer() has not been implemented.");
+  }
+
   /// Changes the enabled status of an audio effect.
   Future<AudioEffectSetEnabledResponse> audioEffectSetEnabled(
       AudioEffectSetEnabledRequest request) {
@@ -211,8 +234,8 @@ abstract class AudioPlayerPlatform {
 
   /// Sets the target gain on the Android loudness enhancer.
   Future<AndroidLoudnessEnhancerSetTargetGainResponse>
-      androidLoudnessEnhancerSetTargetGain(
-          AndroidLoudnessEnhancerSetTargetGainRequest request) {
+  androidLoudnessEnhancerSetTargetGain(
+      AndroidLoudnessEnhancerSetTargetGainRequest request) {
     throw UnimplementedError(
         "androidLoudnessEnhancerSetTargetGain() has not been implemented.");
   }
@@ -297,19 +320,19 @@ class PlaybackEventMessage {
   static PlaybackEventMessage fromMap(Map<dynamic, dynamic> map) =>
       PlaybackEventMessage(
         processingState:
-            ProcessingStateMessage.values[map['processingState'] as int],
+        ProcessingStateMessage.values[map['processingState'] as int],
         updateTime:
-            DateTime.fromMillisecondsSinceEpoch(map['updateTime'] as int),
+        DateTime.fromMillisecondsSinceEpoch(map['updateTime'] as int),
         updatePosition: Duration(microseconds: map['updatePosition'] as int),
         bufferedPosition:
-            Duration(microseconds: map['bufferedPosition'] as int),
+        Duration(microseconds: map['bufferedPosition'] as int),
         duration: map['duration'] == null || map['duration'] as int < 0
             ? null
             : Duration(microseconds: map['duration'] as int),
         icyMetadata: map['icyMetadata'] == null
             ? null
             : IcyMetadataMessage.fromMap(
-                map['icyMetadata'] as Map<dynamic, dynamic>),
+            map['icyMetadata'] as Map<dynamic, dynamic>),
         currentIndex: map['currentIndex'] as int?,
         androidAudioSessionId: map['androidAudioSessionId'] as int?,
       );
@@ -342,7 +365,7 @@ class IcyMetadataMessage {
         headers: json['headers'] == null
             ? null
             : IcyHeadersMessage.fromMap(
-                json['headers'] as Map<dynamic, dynamic>),
+            json['headers'] as Map<dynamic, dynamic>),
       );
 }
 
@@ -407,16 +430,16 @@ class InitRequest {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'id': id,
-        'audioLoadConfiguration': audioLoadConfiguration?.toMap(),
-        'androidAudioEffects': androidAudioEffects
-            .map((audioEffect) => audioEffect.toMap())
-            .toList(),
-        'darwinAudioEffects': darwinAudioEffects
-            .map((audioEffect) => audioEffect.toMap())
-            .toList(),
-        'androidOffloadSchedulingEnabled': androidOffloadSchedulingEnabled,
-      };
+    'id': id,
+    'audioLoadConfiguration': audioLoadConfiguration?.toMap(),
+    'androidAudioEffects': androidAudioEffects
+        .map((audioEffect) => audioEffect.toMap())
+        .toList(),
+    'darwinAudioEffects': darwinAudioEffects
+        .map((audioEffect) => audioEffect.toMap())
+        .toList(),
+    'androidOffloadSchedulingEnabled': androidOffloadSchedulingEnabled,
+  };
 }
 
 /// Information communicated to the platform implementation when disposing of a
@@ -427,8 +450,8 @@ class DisposePlayerRequest {
   DisposePlayerRequest({required this.id});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'id': id,
-      };
+    'id': id,
+  };
 }
 
 /// Information returned by the platform implementation after disposing of a
@@ -467,10 +490,10 @@ class LoadRequest {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'audioSource': audioSourceMessage.toMap(),
-        'initialPosition': initialPosition?.inMicroseconds,
-        'initialIndex': initialIndex,
-      };
+    'audioSource': audioSourceMessage.toMap(),
+    'initialPosition': initialPosition?.inMicroseconds,
+    'initialIndex': initialIndex,
+  };
 }
 
 /// Information returned by the platform implementation after loading an audio
@@ -517,8 +540,8 @@ class SetVolumeRequest {
   SetVolumeRequest({required this.volume});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'volume': volume,
-      };
+    'volume': volume,
+  };
 }
 
 /// Information returned by the platform implementation after setting the
@@ -536,8 +559,8 @@ class SetSpeedRequest {
   SetSpeedRequest({required this.speed});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'speed': speed,
-      };
+    'speed': speed,
+  };
 }
 
 /// Information returned by the platform implementation after setting the
@@ -555,8 +578,8 @@ class SetPitchRequest {
   SetPitchRequest({required this.pitch});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'pitch': pitch,
-      };
+    'pitch': pitch,
+  };
 }
 
 /// Information returned by the platform implementation after setting the
@@ -574,8 +597,8 @@ class SetSkipSilenceRequest {
   SetSkipSilenceRequest({required this.enabled});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'enabled': enabled,
-      };
+    'enabled': enabled,
+  };
 }
 
 /// Information returned by the platform implementation after setting the
@@ -593,8 +616,8 @@ class SetLoopModeRequest {
   SetLoopModeRequest({required this.loopMode});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'loopMode': loopMode.index,
-      };
+    'loopMode': loopMode.index,
+  };
 }
 
 /// Information returned by the platform implementation after setting the
@@ -615,8 +638,8 @@ class SetShuffleModeRequest {
   SetShuffleModeRequest({required this.shuffleMode});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'shuffleMode': shuffleMode.index,
-      };
+    'shuffleMode': shuffleMode.index,
+  };
 }
 
 /// Information returned by the platform implementation after setting the
@@ -637,8 +660,8 @@ class SetShuffleOrderRequest {
   SetShuffleOrderRequest({required this.audioSourceMessage});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'audioSource': audioSourceMessage.toMap(),
-      };
+    'audioSource': audioSourceMessage.toMap(),
+  };
 }
 
 /// Information returned by the platform implementation after setting the
@@ -656,15 +679,15 @@ class SetAutomaticallyWaitsToMinimizeStallingRequest {
   SetAutomaticallyWaitsToMinimizeStallingRequest({required this.enabled});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'enabled': enabled,
-      };
+    'enabled': enabled,
+  };
 }
 
 /// Information returned by the platform implementation after setting the
 /// automaticallyWaitsToMinimizeStalling option.
 class SetAutomaticallyWaitsToMinimizeStallingResponse {
   static SetAutomaticallyWaitsToMinimizeStallingResponse fromMap(
-          Map<dynamic, dynamic> map) =>
+      Map<dynamic, dynamic> map) =>
       SetAutomaticallyWaitsToMinimizeStallingResponse();
 }
 
@@ -677,15 +700,15 @@ class SetCanUseNetworkResourcesForLiveStreamingWhilePausedRequest {
       {required this.enabled});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'enabled': enabled,
-      };
+    'enabled': enabled,
+  };
 }
 
 /// Information returned by the platform implementation after setting the
 /// canUseNetworkResourcesForLiveStreamingWhilePaused option.
 class SetCanUseNetworkResourcesForLiveStreamingWhilePausedResponse {
   static SetCanUseNetworkResourcesForLiveStreamingWhilePausedResponse fromMap(
-          Map<dynamic, dynamic> map) =>
+      Map<dynamic, dynamic> map) =>
       SetCanUseNetworkResourcesForLiveStreamingWhilePausedResponse();
 }
 
@@ -697,8 +720,8 @@ class SetPreferredPeakBitRateRequest {
   SetPreferredPeakBitRateRequest({required this.bitRate});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'bitRate': bitRate,
-      };
+    'bitRate': bitRate,
+  };
 }
 
 /// Information returned by the platform implementation after setting the
@@ -716,8 +739,8 @@ class SetAllowsExternalPlaybackRequest {
   SetAllowsExternalPlaybackRequest({required this.allowsExternalPlayback});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'allowsExternalPlayback': allowsExternalPlayback,
-      };
+    'allowsExternalPlayback': allowsExternalPlayback,
+  };
 }
 
 /// Information returned by the platform implementation after setting the
@@ -736,9 +759,9 @@ class SeekRequest {
   SeekRequest({this.position, this.index});
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'position': position?.inMicroseconds,
-        'index': index,
-      };
+    'position': position?.inMicroseconds,
+    'index': index,
+  };
 }
 
 /// Information returned by the platform implementation after seeking to a
@@ -761,10 +784,10 @@ class SetAndroidAudioAttributesRequest {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'contentType': contentType,
-        'flags': flags,
-        'usage': usage,
-      };
+    'contentType': contentType,
+    'flags': flags,
+    'usage': usage,
+  };
 }
 
 /// Information returned by the platform implementation after setting the
@@ -801,11 +824,11 @@ class ConcatenatingInsertAllRequest {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'id': id,
-        'index': index,
-        'children': children.map((child) => child.toMap()).toList(),
-        'shuffleOrder': shuffleOrder,
-      };
+    'id': id,
+    'index': index,
+    'children': children.map((child) => child.toMap()).toList(),
+    'shuffleOrder': shuffleOrder,
+  };
 }
 
 /// Information returned by the platform implementation after inserting audio
@@ -831,11 +854,11 @@ class ConcatenatingRemoveRangeRequest {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'id': id,
-        'startIndex': startIndex,
-        'endIndex': endIndex,
-        'shuffleOrder': shuffleOrder,
-      };
+    'id': id,
+    'startIndex': startIndex,
+    'endIndex': endIndex,
+    'shuffleOrder': shuffleOrder,
+  };
 }
 
 /// Information returned by the platform implementation after removing audio
@@ -861,11 +884,11 @@ class ConcatenatingMoveRequest {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'id': id,
-        'currentIndex': currentIndex,
-        'newIndex': newIndex,
-        'shuffleOrder': shuffleOrder,
-      };
+    'id': id,
+    'currentIndex': currentIndex,
+    'newIndex': newIndex,
+    'shuffleOrder': shuffleOrder,
+  };
 }
 
 /// Information returned by the platform implementation after moving an audio
@@ -873,6 +896,79 @@ class ConcatenatingMoveRequest {
 class ConcatenatingMoveResponse {
   static ConcatenatingMoveResponse fromMap(Map<dynamic, dynamic> map) =>
       ConcatenatingMoveResponse();
+}
+
+/// Information communicated to the platform implementation when starting the
+/// visualizer.
+class StartVisualizerRequest {
+  final bool enableWaveform;
+  final bool enableFft;
+  final int? captureRate;
+  final int? captureSize;
+
+  StartVisualizerRequest({
+    required this.enableWaveform,
+    required this.enableFft,
+    required this.captureRate,
+    required this.captureSize,
+  });
+
+  Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
+    'enableWaveform': enableWaveform,
+    'enableFft': enableFft,
+    'captureRate': captureRate,
+    'captureSize': captureSize,
+  };
+}
+
+/// Information returned by the platform implementation after starting the
+/// visualizer.
+class StartVisualizerResponse {
+  StartVisualizerResponse();
+
+  static StartVisualizerResponse fromMap(Map<dynamic, dynamic> map) =>
+      StartVisualizerResponse();
+}
+
+/// Information communicated to the platform implementation when stopping the
+/// visualizer.
+class StopVisualizerRequest {
+  Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{};
+}
+
+/// Information returned by the platform implementation after stopping the
+/// visualizer.
+class StopVisualizerResponse {
+  static StopVisualizerResponse fromMap(Map<dynamic, dynamic> map) =>
+      StopVisualizerResponse();
+}
+
+/// A capture of audio waveform data.
+class VisualizerWaveformCaptureMessage {
+  /// The sampling rate of the capture.
+  final int samplingRate;
+
+  /// The waveform data.
+  final Uint8List data;
+
+  VisualizerWaveformCaptureMessage({
+    required this.samplingRate,
+    required this.data,
+  });
+}
+
+/// A capture of audio FFT data.
+class VisualizerFftCaptureMessage {
+  /// The sampling rate of the capture.
+  final int samplingRate;
+
+  /// The FFT data.
+  final Uint8List data;
+
+  VisualizerFftCaptureMessage({
+    required this.samplingRate,
+    required this.data,
+  });
 }
 
 /// Information communicated to the platform implementation when setting the
@@ -889,11 +985,11 @@ class AudioLoadConfigurationMessage {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'darwinLoadControl': darwinLoadControl?.toMap(),
-        'androidLoadControl': androidLoadControl?.toMap(),
-        'androidLivePlaybackSpeedControl':
-            androidLivePlaybackSpeedControl?.toMap(),
-      };
+    'darwinLoadControl': darwinLoadControl?.toMap(),
+    'androidLoadControl': androidLoadControl?.toMap(),
+    'androidLivePlaybackSpeedControl':
+    androidLivePlaybackSpeedControl?.toMap(),
+  };
 }
 
 class DarwinLoadControlMessage {
@@ -922,14 +1018,14 @@ class DarwinLoadControlMessage {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'automaticallyWaitsToMinimizeStalling':
-            automaticallyWaitsToMinimizeStalling,
-        'preferredForwardBufferDuration':
-            preferredForwardBufferDuration?.inMicroseconds,
-        'canUseNetworkResourcesForLiveStreamingWhilePaused':
-            canUseNetworkResourcesForLiveStreamingWhilePaused,
-        'preferredPeakBitRate': preferredPeakBitRate,
-      };
+    'automaticallyWaitsToMinimizeStalling':
+    automaticallyWaitsToMinimizeStalling,
+    'preferredForwardBufferDuration':
+    preferredForwardBufferDuration?.inMicroseconds,
+    'canUseNetworkResourcesForLiveStreamingWhilePaused':
+    canUseNetworkResourcesForLiveStreamingWhilePaused,
+    'preferredPeakBitRate': preferredPeakBitRate,
+  };
 }
 
 class AndroidLoadControlMessage {
@@ -970,15 +1066,15 @@ class AndroidLoadControlMessage {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'minBufferDuration': minBufferDuration.inMicroseconds,
-        'maxBufferDuration': maxBufferDuration.inMicroseconds,
-        'bufferForPlaybackDuration': bufferForPlaybackDuration.inMicroseconds,
-        'bufferForPlaybackAfterRebufferDuration':
-            bufferForPlaybackAfterRebufferDuration.inMicroseconds,
-        'targetBufferBytes': targetBufferBytes,
-        'prioritizeTimeOverSizeThresholds': prioritizeTimeOverSizeThresholds,
-        'backBufferDuration': backBufferDuration.inMicroseconds,
-      };
+    'minBufferDuration': minBufferDuration.inMicroseconds,
+    'maxBufferDuration': maxBufferDuration.inMicroseconds,
+    'bufferForPlaybackDuration': bufferForPlaybackDuration.inMicroseconds,
+    'bufferForPlaybackAfterRebufferDuration':
+    bufferForPlaybackAfterRebufferDuration.inMicroseconds,
+    'targetBufferBytes': targetBufferBytes,
+    'prioritizeTimeOverSizeThresholds': prioritizeTimeOverSizeThresholds,
+    'backBufferDuration': backBufferDuration.inMicroseconds,
+  };
 }
 
 class AndroidLivePlaybackSpeedControlMessage {
@@ -1022,17 +1118,17 @@ class AndroidLivePlaybackSpeedControlMessage {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'fallbackMinPlaybackSpeed': fallbackMinPlaybackSpeed,
-        'fallbackMaxPlaybackSpeed': fallbackMaxPlaybackSpeed,
-        'minUpdateInterval': minUpdateInterval.inMicroseconds,
-        'proportionalControlFactor': proportionalControlFactor,
-        'maxLiveOffsetErrorForUnitSpeed':
-            maxLiveOffsetErrorForUnitSpeed.inMicroseconds,
-        'targetLiveOffsetIncrementOnRebuffer':
-            targetLiveOffsetIncrementOnRebuffer.inMicroseconds,
-        'minPossibleLiveOffsetSmoothingFactor':
-            minPossibleLiveOffsetSmoothingFactor,
-      };
+    'fallbackMinPlaybackSpeed': fallbackMinPlaybackSpeed,
+    'fallbackMaxPlaybackSpeed': fallbackMaxPlaybackSpeed,
+    'minUpdateInterval': minUpdateInterval.inMicroseconds,
+    'proportionalControlFactor': proportionalControlFactor,
+    'maxLiveOffsetErrorForUnitSpeed':
+    maxLiveOffsetErrorForUnitSpeed.inMicroseconds,
+    'targetLiveOffsetIncrementOnRebuffer':
+    targetLiveOffsetIncrementOnRebuffer.inMicroseconds,
+    'minPossibleLiveOffsetSmoothingFactor':
+    minPossibleLiveOffsetSmoothingFactor,
+  };
 }
 
 /// Progressive audio source options to be communicated with the platform
@@ -1047,9 +1143,9 @@ class ProgressiveAudioSourceOptionsMessage {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'androidExtractorOptions': androidExtractorOptions?.toMap(),
-        'darwinAssetOptions': darwinAssetOptions?.toMap(),
-      };
+    'androidExtractorOptions': androidExtractorOptions?.toMap(),
+    'darwinAssetOptions': darwinAssetOptions?.toMap(),
+  };
 }
 
 /// Options for loading audio assets on iOS/macOS to be communicated with the
@@ -1062,8 +1158,8 @@ class DarwinAssetOptionsMessage {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'preferPreciseDurationAndTiming': preferPreciseDurationAndTiming,
-      };
+    'preferPreciseDurationAndTiming': preferPreciseDurationAndTiming,
+  };
 }
 
 /// Options for extracting media files on Android to be communicated with the
@@ -1080,11 +1176,11 @@ class AndroidExtractorOptionsMessage {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'constantBitrateSeekingEnabled': constantBitrateSeekingEnabled,
-        'constantBitrateSeekingAlwaysEnabled':
-            constantBitrateSeekingAlwaysEnabled,
-        'mp3Flags': mp3Flags,
-      };
+    'constantBitrateSeekingEnabled': constantBitrateSeekingEnabled,
+    'constantBitrateSeekingAlwaysEnabled':
+    constantBitrateSeekingAlwaysEnabled,
+    'mp3Flags': mp3Flags,
+  };
 }
 
 /// Information about an audio source to be communicated with the platform
@@ -1135,12 +1231,12 @@ class ProgressiveAudioSourceMessage extends UriAudioSourceMessage {
 
   @override
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'type': 'progressive',
-        'id': id,
-        'uri': uri,
-        'headers': headers,
-        'options': options?.toMap(),
-      };
+    'type': 'progressive',
+    'id': id,
+    'uri': uri,
+    'headers': headers,
+    'options': options?.toMap(),
+  };
 }
 
 /// Information about a DASH audio source to be communicated with the platform
@@ -1155,11 +1251,11 @@ class DashAudioSourceMessage extends UriAudioSourceMessage {
 
   @override
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'type': 'dash',
-        'id': id,
-        'uri': uri,
-        'headers': headers,
-      };
+    'type': 'dash',
+    'id': id,
+    'uri': uri,
+    'headers': headers,
+  };
 }
 
 /// Information about a HLS audio source to be communicated with the platform
@@ -1174,11 +1270,11 @@ class HlsAudioSourceMessage extends UriAudioSourceMessage {
 
   @override
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'type': 'hls',
-        'id': id,
-        'uri': uri,
-        'headers': headers,
-      };
+    'type': 'hls',
+    'id': id,
+    'uri': uri,
+    'headers': headers,
+  };
 }
 
 /// Information about a silence audio source to be communicated with the
@@ -1193,10 +1289,10 @@ class SilenceAudioSourceMessage extends IndexedAudioSourceMessage {
 
   @override
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'type': 'silence',
-        'id': id,
-        'duration': duration.inMicroseconds,
-      };
+    'type': 'silence',
+    'id': id,
+    'duration': duration.inMicroseconds,
+  };
 }
 
 /// Information about a concatenating audio source to be communicated with the
@@ -1215,12 +1311,12 @@ class ConcatenatingAudioSourceMessage extends AudioSourceMessage {
 
   @override
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'type': 'concatenating',
-        'id': id,
-        'children': children.map((child) => child.toMap()).toList(),
-        'useLazyPreparation': useLazyPreparation,
-        'shuffleOrder': shuffleOrder,
-      };
+    'type': 'concatenating',
+    'id': id,
+    'children': children.map((child) => child.toMap()).toList(),
+    'useLazyPreparation': useLazyPreparation,
+    'shuffleOrder': shuffleOrder,
+  };
 }
 
 /// Information about a clipping audio source to be communicated with the
@@ -1240,12 +1336,12 @@ class ClippingAudioSourceMessage extends IndexedAudioSourceMessage {
 
   @override
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'type': 'clipping',
-        'id': id,
-        'child': child.toMap(),
-        'start': start?.inMicroseconds,
-        'end': end?.inMicroseconds,
-      };
+    'type': 'clipping',
+    'id': id,
+    'child': child.toMap(),
+    'start': start?.inMicroseconds,
+    'end': end?.inMicroseconds,
+  };
 }
 
 /// Information about a looping audio source to be communicated with the
@@ -1262,11 +1358,11 @@ class LoopingAudioSourceMessage extends AudioSourceMessage {
 
   @override
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'type': 'looping',
-        'id': id,
-        'child': child.toMap(),
-        'count': count,
-      };
+    'type': 'looping',
+    'id': id,
+    'child': child.toMap(),
+    'count': count,
+  };
 }
 
 /// Information communicated to the platform implementation when setting the
@@ -1281,9 +1377,9 @@ class AudioEffectSetEnabledRequest {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'type': type,
-        'enabled': enabled,
-      };
+    'type': type,
+    'enabled': enabled,
+  };
 }
 
 /// Information returned by the platform implementation after setting the
@@ -1304,15 +1400,15 @@ class AndroidLoudnessEnhancerSetTargetGainRequest {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'targetGain': targetGain,
-      };
+    'targetGain': targetGain,
+  };
 }
 
 /// Information returned by the platform implementation after setting the target
 /// gain on the loudness enhancer audio effect.
 class AndroidLoudnessEnhancerSetTargetGainResponse {
   static AndroidLoudnessEnhancerSetTargetGainResponse fromMap(
-          Map<dynamic, dynamic> map) =>
+      Map<dynamic, dynamic> map) =>
       AndroidLoudnessEnhancerSetTargetGainResponse();
 }
 
@@ -1332,7 +1428,7 @@ class AndroidEqualizerGetParametersResponse {
   AndroidEqualizerGetParametersResponse({required this.parameters});
 
   static AndroidEqualizerGetParametersResponse fromMap(
-          Map<dynamic, dynamic> map) =>
+      Map<dynamic, dynamic> map) =>
       AndroidEqualizerGetParametersResponse(
         parameters: AndroidEqualizerParametersMessage.fromMap(
             map['parameters'] as Map<dynamic, dynamic>),
@@ -1351,9 +1447,9 @@ class AndroidEqualizerBandSetGainRequest {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'bandIndex': bandIndex,
-        'gain': gain,
-      };
+    'bandIndex': bandIndex,
+    'gain': gain,
+  };
 }
 
 /// Information returned by the platform implementation after setting the gain
@@ -1362,7 +1458,7 @@ class AndroidEqualizerBandSetGainResponse {
   AndroidEqualizerBandSetGainResponse();
 
   static AndroidEqualizerBandSetGainResponse fromMap(
-          Map<dynamic, dynamic> map) =>
+      Map<dynamic, dynamic> map) =>
       AndroidEqualizerBandSetGainResponse();
 }
 
@@ -1388,10 +1484,10 @@ class AndroidLoudnessEnhancerMessage extends AudioEffectMessage {
 
   @override
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'type': 'AndroidLoudnessEnhancer',
-        'enabled': enabled,
-        'targetGain': targetGain,
-      };
+    'type': 'AndroidLoudnessEnhancer',
+    'enabled': enabled,
+    'targetGain': targetGain,
+  };
 }
 
 /// Information about an equalizer band to be communicated with the platform
@@ -1421,12 +1517,12 @@ class AndroidEqualizerBandMessage {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'index': index,
-        'lowerFrequency': lowerFrequency,
-        'upperFrequency': upperFrequency,
-        'centerFrequency': centerFrequency,
-        'gain': gain,
-      };
+    'index': index,
+    'lowerFrequency': lowerFrequency,
+    'upperFrequency': upperFrequency,
+    'centerFrequency': centerFrequency,
+    'gain': gain,
+  };
 
   static AndroidEqualizerBandMessage fromMap(Map<dynamic, dynamic> map) =>
       AndroidEqualizerBandMessage(
@@ -1452,10 +1548,10 @@ class AndroidEqualizerParametersMessage {
   });
 
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'minDecibels': minDecibels,
-        'maxDecibels': maxDecibels,
-        'bands': bands.map((band) => band.toMap()).toList(),
-      };
+    'minDecibels': minDecibels,
+    'maxDecibels': maxDecibels,
+    'bands': bands.map((band) => band.toMap()).toList(),
+  };
 
   static AndroidEqualizerParametersMessage fromMap(Map<dynamic, dynamic> map) =>
       AndroidEqualizerParametersMessage(
@@ -1463,7 +1559,7 @@ class AndroidEqualizerParametersMessage {
         maxDecibels: map['maxDecibels'] as double,
         bands: (map['bands'] as List<dynamic>)
             .map((dynamic bandMap) => AndroidEqualizerBandMessage.fromMap(
-                bandMap as Map<dynamic, dynamic>))
+            bandMap as Map<dynamic, dynamic>))
             .toList(),
       );
 }
@@ -1480,8 +1576,8 @@ class AndroidEqualizerMessage extends AudioEffectMessage {
 
   @override
   Map<dynamic, dynamic> toMap() => <dynamic, dynamic>{
-        'type': 'AndroidEqualizer',
-        'enabled': enabled,
-        'parameters': parameters?.toMap(),
-      };
+    'type': 'AndroidEqualizer',
+    'enabled': enabled,
+    'parameters': parameters?.toMap(),
+  };
 }
