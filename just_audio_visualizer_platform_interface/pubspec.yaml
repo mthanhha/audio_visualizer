@@ -1,4 +1,4 @@
-name: just_audio_platform_interface
+name: just_audio_visualizer_platform_interface
 description: A common platform interface for the just_audio plugin. Different platform implementations of just_audio should implement this interface.
 homepage: https://github.com/ryanheise/just_audio/tree/master/just_audio_platform_interface
 # NOTE: We strongly prefer non-breaking changes, even at the expense of a
