@@ -1,3 +1,7 @@
+## 0.10.1
+
+* 
+
 ## 0.9.36
 
 * Add setAllowsExternalPlayback on iOS/macOS.
